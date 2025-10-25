@@ -471,7 +471,7 @@ const MonthlySummary: React.FC = () => {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {Object.entries(monthlyData.dailyEntries).map(([day, data]) => {
-                  const dayDate = format(parse(`${year}-${month}-${day}`, 'yyyy-MM-dd', new Date()), 'MMMM d, yyyy');
+                  const dayDate = format(parse(`${year}-${month}-${day}`, 'yyyy-MM-dd', new Date()), 'd MMMM, yyyy');
                   const statusType = data.presentCount > 0 ? 'present' : data.absentCount > 0 ? 'absent' : null;
 
                   return (
