@@ -11,6 +11,8 @@ export interface Label {
   created_at: string;
   is_driver_status: boolean;
   is_pinned: boolean;
+  diesel_average: number;
+  current_range: number;
 }
 
 export interface TankerEntry {
@@ -26,6 +28,7 @@ export interface TankerEntry {
   total_km: number | null;
   cash_taken: number | null;
   notes: string | null;
+  diesel_added: number;
 }
 
 export interface DailyEntries {
@@ -37,6 +40,7 @@ export interface DailyEntries {
   totalCashTaken: number;
   presentCount: number;
   absentCount: number;
+  totalDieselAdded: number;
 }
 
 export interface MonthlyData {
@@ -47,4 +51,5 @@ export interface MonthlyData {
   totalCashTaken: number;
   totalPresentCount: number;
   totalAbsentCount: number;
+  totalDieselAdded: number;
 }

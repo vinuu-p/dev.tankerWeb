@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Calendar, ChevronLeft, ChevronRight, BarChart2, Loader2 } from 'lucide-react';
+import { ArrowLeft, Calendar, ChevronLeft, ChevronRight, BarChart2, Loader2, Gauge, Fuel } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { format, getDaysInMonth, getMonth, getYear, isToday } from 'date-fns';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { Label, TankerEntry } from '../types';
+import AddAverageModal from '../components/AddAverageModal';
 
 const LabelView: React.FC = () => {
   const { labelId } = useParams<{ labelId: string }>();
@@ -16,6 +17,7 @@ const LabelView: React.FC = () => {
   const [entriesByDay, setEntriesByDay] = useState<Record<string, TankerEntry[]>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [totalTankers, setTotalTankers] = useState(0);
+  const [isAverageModalOpen, setIsAverageModalOpen] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -48,6 +50,23 @@ const LabelView: React.FC = () => {
     } catch (error: any) {
       toast.error('Failed to load label: ' + error.message);
       navigate('/');
+    }
+  };
+
+  const handleSaveAverage = async (average: number) => {
+    try {
+      const { error } = await supabase
+        .from('labels')
+        .update({ diesel_average: average })
+        .eq('id', labelId)
+        .eq('user_id', user?.id);
+
+      if (error) throw error;
+
+      setLabel(prev => prev ? { ...prev, diesel_average: average } : null);
+      toast.success('Diesel average updated successfully');
+    } catch (error: any) {
+      toast.error('Failed to update diesel average: ' + error.message);
     }
   };
 
@@ -168,15 +187,28 @@ const LabelView: React.FC = () => {
           </div>
         </div>
 
-        <motion.button
-          whileHover={{ scale: 1.03 }}
-          whileTap={{ scale: 0.97 }}
-          onClick={() => navigate(`/labels/${labelId}/${year}/${String(month).padStart(2, '0')}/summary`)}
-          className="flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-        >
-          <BarChart2 className="mr-2 h-4 w-4 text-gray-500" />
-          View Monthly Summary
-        </motion.button>
+        <div className="flex flex-wrap gap-2">
+          {label?.is_driver_status && (
+            <motion.button
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => setIsAverageModalOpen(true)}
+              className="flex items-center px-4 py-2 border border-blue-300 rounded-md shadow-sm text-sm font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              <Gauge className="mr-2 h-4 w-4" />
+              Add Average
+            </motion.button>
+          )}
+          <motion.button
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={() => navigate(`/labels/${labelId}/${year}/${String(month).padStart(2, '0')}/summary`)}
+            className="flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            <BarChart2 className="mr-2 h-4 w-4 text-gray-500" />
+            View Monthly Summary
+          </motion.button>
+        </div>
       </div>
 
       <div className="bg-white rounded-lg shadow-sm overflow-hidden">
@@ -209,6 +241,28 @@ const LabelView: React.FC = () => {
         </div>
 
         <div className="p-4">
+          {label?.is_driver_status && (
+            <div className="mb-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-4 border border-green-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <div className="bg-green-100 rounded-full p-2 mr-3">
+                    <Fuel className="h-5 w-5 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Current Range</p>
+                    <p className="text-2xl font-bold text-green-700">{label?.current_range?.toFixed(2) || '0.00'} km</p>
+                  </div>
+                </div>
+                {label?.diesel_average > 0 && (
+                  <div className="text-right">
+                    <p className="text-xs text-gray-500">Average</p>
+                    <p className="text-sm font-semibold text-gray-700">{label.diesel_average} km/l</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           <div className="mb-4 flex items-center justify-between">
             <div>
               <span className="text-sm font-medium text-gray-600">Total Tankers:</span>
@@ -285,6 +339,13 @@ const LabelView: React.FC = () => {
           </motion.div>
         </div>
       </div>
+
+      <AddAverageModal
+        isOpen={isAverageModalOpen}
+        onClose={() => setIsAverageModalOpen(false)}
+        onSave={handleSaveAverage}
+        currentAverage={label?.diesel_average || 0}
+      />
     </div>
   );
 };

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, FileText, Download, Calendar, Tractor, IndianRupee, Loader2, MapPin, UserCheck, UserX } from 'lucide-react';
+import { ArrowLeft, FileText, Download, Calendar, Tractor, IndianRupee, Loader2, MapPin, UserCheck, UserX, Fuel, Gauge } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { format, parse } from 'date-fns';
 import { jsPDF } from 'jspdf';
@@ -86,6 +86,7 @@ const MonthlySummary: React.FC = () => {
       let totalCashTaken = 0;
       let totalPresentCount = 0;
       let totalAbsentCount = 0;
+      let totalDieselAdded = 0;
 
       (data || []).forEach(entry => {
         const day = entry.date.split('-')[2];
@@ -99,7 +100,8 @@ const MonthlySummary: React.FC = () => {
             totalKm: 0,
             totalCashTaken: 0,
             presentCount: 0,
-            absentCount: 0
+            absentCount: 0,
+            totalDieselAdded: 0
           };
         }
 
@@ -113,6 +115,7 @@ const MonthlySummary: React.FC = () => {
         dailyEntries[day].totalCash += entry.cash_amount || 0;
         dailyEntries[day].totalKm += entry.total_km || 0;
         dailyEntries[day].totalCashTaken += entry.cash_taken || 0;
+        dailyEntries[day].totalDieselAdded += entry.diesel_added || 0;
 
         if (entry.driver_status === 'present') {
           dailyEntries[day].presentCount++;
@@ -125,6 +128,7 @@ const MonthlySummary: React.FC = () => {
         totalCash += entry.cash_amount || 0;
         totalKm += entry.total_km || 0;
         totalCashTaken += entry.cash_taken || 0;
+        totalDieselAdded += entry.diesel_added || 0;
       });
 
       const sortedDailyEntries = Object.entries(dailyEntries)
@@ -138,7 +142,8 @@ const MonthlySummary: React.FC = () => {
         totalKm,
         totalCashTaken,
         totalPresentCount,
-        totalAbsentCount
+        totalAbsentCount,
+        totalDieselAdded
       });
     } catch (error: any) {
       toast.error('Failed to load data: ' + error.message);
@@ -168,6 +173,12 @@ const MonthlySummary: React.FC = () => {
         doc.text(`Total KM: ${monthlyData.totalKm.toFixed(2)}`, 14, yPosition);
         yPosition += 7;
         doc.text(`Total Cash Taken: ₹${monthlyData.totalCashTaken.toFixed(2)}`, 14, yPosition);
+        yPosition += 7;
+        doc.text(`Total Diesel Added: ${monthlyData.totalDieselAdded.toFixed(2)} L`, 14, yPosition);
+        yPosition += 7;
+        doc.text(`Vehicle Average: ${label.diesel_average || 0} km/l`, 14, yPosition);
+        yPosition += 7;
+        doc.text(`Current Range: ${label.current_range?.toFixed(2) || '0.00'} km`, 14, yPosition);
         yPosition += 7;
         doc.text(`Present Days: ${monthlyData.totalPresentCount}`, 14, yPosition);
         yPosition += 7;
@@ -205,7 +216,7 @@ const MonthlySummary: React.FC = () => {
         yPosition += 8;
 
         const tableHeaders = label.is_driver_status
-          ? ['#', 'Time', 'Status', 'Tankers', 'KM', 'Cash Taken', 'Notes']
+          ? ['#', 'Time', 'Status', 'Tankers', 'KM', 'Cash', 'Diesel (L)', 'Notes']
           : ['#', 'Time', 'Tankers', 'Cash Amount'];
 
         const tableData = data.entries.map((entry, index) => {
@@ -219,6 +230,7 @@ const MonthlySummary: React.FC = () => {
               tankerCount.toString(),
               entry.total_km?.toFixed(2) || '-',
               entry.cash_taken ? `₹${entry.cash_taken.toFixed(2)}` : '-',
+              entry.diesel_added > 0 ? entry.diesel_added.toFixed(2) : '-',
               entry.notes || '-'
             ];
           }
@@ -397,6 +409,42 @@ const MonthlySummary: React.FC = () => {
                   </p>
                 </div>
               </div>
+
+              <div className="bg-amber-50 rounded-lg p-4 flex items-center">
+                <div className="bg-amber-100 rounded-full p-3 mr-4">
+                  <Fuel className="h-6 w-6 text-amber-600" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-amber-800">Total Diesel Added</p>
+                  <p className="text-2xl font-bold text-amber-900">
+                    {monthlyData.totalDieselAdded.toFixed(2)} L
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-cyan-50 rounded-lg p-4 flex items-center">
+                <div className="bg-cyan-100 rounded-full p-3 mr-4">
+                  <Gauge className="h-6 w-6 text-cyan-600" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-cyan-800">Average</p>
+                  <p className="text-2xl font-bold text-cyan-900">
+                    {label?.diesel_average || 0} km/l
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-teal-50 rounded-lg p-4 flex items-center">
+                <div className="bg-teal-100 rounded-full p-3 mr-4">
+                  <Fuel className="h-6 w-6 text-teal-600" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-teal-800">Current Range</p>
+                  <p className="text-2xl font-bold text-teal-900">
+                    {label?.current_range?.toFixed(2) || '0.00'} km
+                  </p>
+                </div>
+              </div>
             </>
           ) : (
             <div className="bg-green-50 rounded-lg p-4 flex items-center">
@@ -459,6 +507,9 @@ const MonthlySummary: React.FC = () => {
                         Cash Taken
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Diesel
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Notes
                       </th>
                     </>
@@ -518,6 +569,9 @@ const MonthlySummary: React.FC = () => {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                             ₹{data.totalCashTaken.toFixed(2)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                            {data.totalDieselAdded > 0 ? `${data.totalDieselAdded.toFixed(2)} L` : '-'}
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-600 max-w-xs truncate">
                             {data.entries.map(e => e.notes).filter(Boolean).join(', ') || '-'}
