@@ -430,153 +430,110 @@ const MonthlySummary: React.FC = () => {
             <p className="text-gray-500">No entries found for this month.</p>
           </div>
         ) : (
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            className="divide-y divide-gray-200"
-          >
-            {Object.entries(monthlyData.dailyEntries).map(([day, data]) => {
-              const dayDate = format(parse(`${year}-${month}-${day}`, 'yyyy-MM-dd', new Date()), 'MMMM d, yyyy');
+          <div className="overflow-x-auto">
+            <motion.table
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              className="min-w-full divide-y divide-gray-200"
+            >
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Date
+                  </th>
+                  {label?.is_driver_status && (
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Status
+                    </th>
+                  )}
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Tankers
+                  </th>
+                  {label?.is_driver_status ? (
+                    <>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        KM
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Cash Taken
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Notes
+                      </th>
+                    </>
+                  ) : (
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Cash Amount
+                    </th>
+                  )}
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {Object.entries(monthlyData.dailyEntries).map(([day, data]) => {
+                  const dayDate = format(parse(`${year}-${month}-${day}`, 'yyyy-MM-dd', new Date()), 'MMMM d, yyyy');
+                  const statusType = data.presentCount > 0 ? 'present' : data.absentCount > 0 ? 'absent' : null;
 
-              return (
-                <motion.div
-                  key={day}
-                  variants={itemVariants}
-                  className="p-4"
-                >
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3">
-                    <h3 className="text-md font-medium text-gray-900">
-                      {dayDate}
-                    </h3>
-                    <div className="mt-2 sm:mt-0 flex flex-wrap gap-3">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                        <Tractor className="h-3 w-3 mr-1" />
-                        {data.totalTankers} Tankers
-                      </span>
-
-                      {label?.is_driver_status ? (
-                        <>
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            <MapPin className="h-3 w-3 mr-1" />
-                            {data.totalKm.toFixed(2)} KM
-                          </span>
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                            <IndianRupee className="h-3 w-3 mr-1" />
-                            ₹{data.totalCashTaken.toFixed(2)}
-                          </span>
-                          {data.presentCount > 0 && (
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
-                              <UserCheck className="h-3 w-3 mr-1" />
-                              Present
-                            </span>
-                          )}
-                          {data.absentCount > 0 && (
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                              <UserX className="h-3 w-3 mr-1" />
-                              Absent
-                            </span>
-                          )}
-                        </>
-                      ) : (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                          <IndianRupee className="h-3 w-3 mr-1" />
-                          ₹{data.totalCash.toFixed(2)}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="mt-2 overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead>
-                        <tr>
-                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            #
-                          </th>
-                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Time
-                          </th>
-                          {label?.is_driver_status && (
-                            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Status
-                            </th>
-                          )}
-                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Tankers
-                          </th>
-                          {label?.is_driver_status ? (
-                            <>
-                              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                KM
-                              </th>
-                              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Cash Taken
-                              </th>
-                              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Notes
-                              </th>
-                            </>
-                          ) : (
-                            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Cash Amount
-                            </th>
-                          )}
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {data.entries.map((entry, index) => {
-                          const tankerCount = entry.total_tankers ?? (entry.driver_status === 'absent' ? 0 : 1);
-
-                          return (
-                            <tr key={entry.id}>
-                              <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
-                                {index + 1}
-                              </td>
-                              <td className="px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
-                                {entry.time}
-                              </td>
-                              {label?.is_driver_status && (
-                                <td className="px-3 py-2 whitespace-nowrap text-sm">
-                                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                                    entry.driver_status === 'present'
-                                      ? 'bg-green-100 text-green-800'
-                                      : 'bg-red-100 text-red-800'
-                                  }`}>
-                                    {entry.driver_status === 'present' ? 'Present' : 'Absent'}
-                                  </span>
-                                </td>
-                              )}
-                              <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-600">
-                                {tankerCount}
-                              </td>
-                              {label?.is_driver_status ? (
+                  return (
+                    <motion.tr
+                      key={day}
+                      variants={itemVariants}
+                      className="hover:bg-gray-50 transition-colors duration-150"
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        {dayDate}
+                      </td>
+                      {label?.is_driver_status && (
+                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                          {statusType ? (
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                              statusType === 'present'
+                                ? 'bg-emerald-100 text-emerald-800'
+                                : 'bg-red-100 text-red-800'
+                            }`}>
+                              {statusType === 'present' ? (
                                 <>
-                                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-600">
-                                    {entry.total_km?.toFixed(2) || '-'}
-                                  </td>
-                                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-600">
-                                    {entry.cash_taken ? `₹${entry.cash_taken.toFixed(2)}` : '-'}
-                                  </td>
-                                  <td className="px-3 py-2 text-sm text-gray-600 max-w-xs truncate">
-                                    {entry.notes || '-'}
-                                  </td>
+                                  <UserCheck className="h-3 w-3 mr-1" />
+                                  Present
                                 </>
                               ) : (
-                                <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-600">
-                                  {entry.cash_amount ? `₹${entry.cash_amount.toFixed(2)}` : '-'}
-                                </td>
+                                <>
+                                  <UserX className="h-3 w-3 mr-1" />
+                                  Absent
+                                </>
                               )}
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </motion.div>
+                            </span>
+                          ) : (
+                            <span className="text-gray-400">-</span>
+                          )}
+                        </td>
+                      )}
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                        {data.totalTankers}
+                      </td>
+                      {label?.is_driver_status ? (
+                        <>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                            {data.totalKm.toFixed(2)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                            ₹{data.totalCashTaken.toFixed(2)}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-600 max-w-xs truncate">
+                            {data.entries.map(e => e.notes).filter(Boolean).join(', ') || '-'}
+                          </td>
+                        </>
+                      ) : (
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                          ₹{data.totalCash.toFixed(2)}
+                        </td>
+                      )}
+                    </motion.tr>
+                  );
+                })}
+              </tbody>
+            </motion.table>
+          </div>
         )}
       </div>
     </div>
