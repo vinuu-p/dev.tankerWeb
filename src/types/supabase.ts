@@ -18,6 +18,8 @@ export interface Database {
           user_id: string
           is_driver_status: boolean
           is_pinned: boolean
+          diesel_average: number
+          current_range: number
         }
         Insert: {
           id?: string
@@ -27,6 +29,8 @@ export interface Database {
           user_id: string
           is_driver_status?: boolean
           is_pinned?: boolean
+          diesel_average?: number
+          current_range?: number
         }
         Update: {
           id?: string
@@ -36,6 +40,8 @@ export interface Database {
           user_id?: string
           is_driver_status?: boolean
           is_pinned?: boolean
+          diesel_average?: number
+          current_range?: number
         }
       }
       tanker_entries: {
@@ -52,6 +58,7 @@ export interface Database {
           total_km: number | null
           cash_taken: number | null
           notes: string | null
+          diesel_added: number
         }
         Insert: {
           id?: string
@@ -66,6 +73,7 @@ export interface Database {
           total_km?: number | null
           cash_taken?: number | null
           notes?: string | null
+          diesel_added?: number
         }
         Update: {
           id?: string
@@ -80,6 +88,7 @@ export interface Database {
           total_km?: number | null
           cash_taken?: number | null
           notes?: string | null
+          diesel_added?: number
         }
       }
     }
