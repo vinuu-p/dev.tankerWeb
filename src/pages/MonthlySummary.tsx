@@ -22,7 +22,8 @@ const MonthlySummary: React.FC = () => {
     totalKm: 0,
     totalCashTaken: 0,
     totalPresentCount: 0,
-    totalAbsentCount: 0
+    totalAbsentCount: 0,
+    totalDieselAdded: 0
   });
   const [isLoading, setIsLoading] = useState(true);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
@@ -378,7 +379,7 @@ const MonthlySummary: React.FC = () => {
                 <div>
                   <p className="text-sm font-medium text-green-800">Total KM</p>
                   <p className="text-2xl font-bold text-green-900">
-                    {monthlyData.totalKm.toFixed(2)}
+                    {(monthlyData.totalKm || 0).toFixed(2)}
                   </p>
                 </div>
               </div>
@@ -390,7 +391,7 @@ const MonthlySummary: React.FC = () => {
                 <div>
                   <p className="text-sm font-medium text-purple-800">Total Cash Taken</p>
                   <p className="text-2xl font-bold text-purple-900">
-                    {monthlyData.totalCashTaken.toFixed(2)}
+                    ₹{(monthlyData.totalCashTaken || 0).toFixed(2)}
                   </p>
                 </div>
               </div>
@@ -426,7 +427,7 @@ const MonthlySummary: React.FC = () => {
                 <div>
                   <p className="text-sm font-medium text-amber-800">Total Diesel Added</p>
                   <p className="text-2xl font-bold text-amber-900">
-                    {monthlyData.totalDieselAdded.toFixed(2)} L
+                    {(monthlyData.totalDieselAdded || 0).toFixed(2)} L
                   </p>
                 </div>
               </div>
@@ -463,7 +464,7 @@ const MonthlySummary: React.FC = () => {
               <div>
                 <p className="text-sm font-medium text-green-800">Total Cash</p>
                 <p className="text-2xl font-bold text-green-900">
-                  ₹{monthlyData.totalCash.toFixed(2)}
+                  ₹{(monthlyData.totalCash || 0).toFixed(2)}
                 </p>
               </div>
             </div>
@@ -574,13 +575,13 @@ const MonthlySummary: React.FC = () => {
                       {label?.is_driver_status ? (
                         <>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                            {data.totalKm.toFixed(2)}
+                            {(data.totalKm || 0).toFixed(2)}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                            ₹{data.totalCashTaken.toFixed(2)}
+                            ₹{(data.totalCashTaken || 0).toFixed(2)}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                            {data.totalDieselAdded > 0 ? `${data.totalDieselAdded.toFixed(2)} L` : '-'}
+                            {data.totalDieselAdded > 0 ? `${(data.totalDieselAdded || 0).toFixed(2)} L` : '-'}
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-600 max-w-xs truncate">
                             {data.entries.map(e => e.notes).filter(Boolean).join(', ') || '-'}
@@ -588,7 +589,7 @@ const MonthlySummary: React.FC = () => {
                         </>
                       ) : (
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                          ₹{data.totalCash.toFixed(2)}
+                          ₹{(data.totalCash || 0).toFixed(2)}
                         </td>
                       )}
                     </motion.tr>
