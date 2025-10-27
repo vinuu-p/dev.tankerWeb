@@ -29,12 +29,15 @@ const MonthlySummary: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const monthName = format(parse(`${year}-${month}-01`, 'yyyy-MM-dd', new Date()), 'MMMM');
+  const monthName = year && month ? format(parse(`${year}-${month}-01`, 'yyyy-MM-dd', new Date()), 'MMMM') : '';
 
   useEffect(() => {
-    if (user && labelId) {
-      fetchLabel();
-      fetchMonthData();
+    if (user && labelId && year && month) {
+      const loadData = async () => {
+        await fetchLabel();
+        await fetchMonthData();
+      };
+      loadData();
     }
   }, [user, labelId, year, month]);
 
@@ -45,13 +48,19 @@ const MonthlySummary: React.FC = () => {
         .select('*')
         .eq('id', labelId)
         .eq('user_id', user?.id)
-        .single();
+        .maybeSingle();
 
       if (error) {
         throw error;
       }
 
-      setLabel(data || null);
+      if (!data) {
+        toast.error('Label not found');
+        navigate('/');
+        return;
+      }
+
+      setLabel(data);
     } catch (error: any) {
       toast.error('Failed to load label: ' + error.message);
       navigate('/');

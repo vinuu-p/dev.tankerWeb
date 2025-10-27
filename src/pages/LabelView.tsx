@@ -40,13 +40,19 @@ const LabelView: React.FC = () => {
         .select('*')
         .eq('id', labelId)
         .eq('user_id', user?.id)
-        .single();
+        .maybeSingle();
 
       if (error) {
         throw error;
       }
 
-      setLabel(data || null);
+      if (!data) {
+        toast.error('Label not found');
+        navigate('/');
+        return;
+      }
+
+      setLabel(data);
     } catch (error: any) {
       toast.error('Failed to load label: ' + error.message);
       navigate('/');
